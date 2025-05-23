@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống điều khiển cửa</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .btn-custom {
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn-door-open {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            border: none;
+            color: white;
+        }
+        .btn-door-close {
+            background: linear-gradient(45deg, #dc3545, #fd7e14);
+            border: none;
+            color: white;
+        }
+        .btn-fingerprint {
+            background: linear-gradient(45deg, #007bff, #6610f2);
+            border: none;
+            color: white;
+        }
+        .status-message {
+            display: none;
+            margin-top: 15px;
+        }
+        .history-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        .fingerprint-item {
+            padding: 8px 15px;
+            margin-bottom: 5px;
+            border-radius: 8px;
+            background: #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .section-title {
+            color: #495057;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <h1 class="text-center text-white mb-4">
+                    <i class="fas fa-door-open me-2"></i>
+                    ĐIỀU KHIỂN CỬA
+                </h1>
+
+                <!-- Điều khiển cửa -->
+                <div class="card mb-4">
+                    <div class="card-body text-center">
+                        <h3 class="section-title">
+                            <i class="fas fa-hand-paper me-2"></i>
+                            Điều khiển cửa
+                        </h3>
+                        <div class="row">
+                            <div class="col-6">
+                                <button class="btn btn-door-open btn-custom w-100" onclick="controlDoor('open')">
+                                    <i class="fas fa-unlock me-2"></i>
+                                    Mở cửa
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button class="btn btn-door-close btn-custom w-100" onclick="controlDoor('close')">
+                                    <i class="fas fa-lock me-2"></i>
+                                    Đóng cửa
+                                </button>
+                            </div>
+                        </div>
+                        <div id="door-status" class="status-message"></div>
+                    </div>
+                </div>
+
+                <!-- Quản lý vân tay -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="section-title">
+                            <i class="fas fa-fingerprint me-2"></i>
+                            Quản lý vân tay
+                        </h3>
+
+                        <!-- Form thêm vân tay -->
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <input type="number" id="fingerprintId" class="form-control" placeholder="ID vân tay (1-10)" min="1" max="10">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" id="fingerprintName" class="form-control" placeholder="Tên người dùng">
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-fingerprint btn-custom w-100" onclick="addFingerprint()">
+                                    <i class="fas fa-plus me-2"></i>
+                                    Thêm
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Danh sách vân tay -->
+                        <div id="fingerprint-list">
+                            <div class="text-center">
+                                <div class="spinner-border" role="status">
+                                    <span class="visually-hidden">Đang tải...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="fingerprint-status" class="status-message"></div>
+                    </div>
+                </div>
+
+                <!-- Lịch sử mở cửa -->
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="section-title">
+                            <i class="fas fa-history me-2"></i>
+                            Lịch sử mở cửa
+                        </h3>
+                        <div class="d-flex gap-2 mb-3 flex-wrap">
+                            <button class="btn btn-outline-primary" onclick="loadHistory()">
+                                <i class="fas fa-sync-alt me-2"></i>
+                                Làm mới
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="clearAllHistory()">
+                                <i class="fas fa-trash-alt me-2"></i>
+                                Xóa tất cả
+                            </button>
+                        </div>
+                        <div id="history-list">
+                            <div class="text-center">
+                                <div class="spinner-border" role="status">
+                                    <span class="visually-hidden">Đang tải...</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="history-status" class="status-message"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Hiển thị thông báo
+        function showMessage(elementId, message, type = 'success') {
+            const element = document.getElementById(elementId);
+            element.className = `status-message alert alert-${type}`;
+            element.textContent = message;
+            element.style.display = 'block';
+
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 3000);
+        }
+
+        // Điều khiển cửa
+        async function controlDoor(action) {
+            try {
+                const response = await fetch(`/door/${action}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    showMessage('door-status', result.message, 'success');
+                    // Tự động tải lại lịch sử sau 1 giây
+                    setTimeout(loadHistory, 1000);
+                } else {
+                    showMessage('door-status', result.message, 'danger');
+                }
+            } catch (error) {
+                showMessage('door-status', 'Lỗi kết nối: ' + error.message, 'danger');
+            }
+        }
+
+        // Thêm vân tay
+        async function addFingerprint() {
+            const fingerprintId = document.getElementById('fingerprintId').value;
+            const fingerprintName = document.getElementById('fingerprintName').value;
+
+            if (!fingerprintId) {
+                showMessage('fingerprint-status', 'Vui lòng nhập ID vân tay', 'warning');
+                return;
+            }
+
+            try {
+                const response = await fetch('/fingerprint/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        fingerprint_id: parseInt(fingerprintId),
+                        name: fingerprintName || `Vân tay ${fingerprintId}`
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    showMessage('fingerprint-status', result.message, 'success');
+                    document.getElementById('fingerprintId').value = '';
+                    document.getElementById('fingerprintName').value = '';
+                    loadFingerprints();
+                } else {
+                    showMessage('fingerprint-status', result.message, 'danger');
+                }
+            } catch (error) {
+                showMessage('fingerprint-status', 'Lỗi kết nối: ' + error.message, 'danger');
+            }
+        }
+
+        // Xóa vân tay
+        async function deleteFingerprint(fingerprintId) {
+            if (!confirm('Bạn có chắc chắn muốn xóa vân tay này?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/fingerprint/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        fingerprint_id: fingerprintId
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    showMessage('fingerprint-status', result.message, 'success');
+                    loadFingerprints();
+                } else {
+                    showMessage('fingerprint-status', result.message, 'danger');
+                }
+            } catch (error) {
+                showMessage('fingerprint-status', 'Lỗi kết nối: ' + error.message, 'danger');
+            }
+        }
+
+        // Tải danh sách vân tay
+        async function loadFingerprints() {
+            try {
+                const response = await fetch('/fingerprints');
+                const fingerprints = await response.json();
+
+                const listElement = document.getElementById('fingerprint-list');
+
+                if (fingerprints.length === 0) {
+                    listElement.innerHTML = '<p class="text-muted text-center">Chưa có vân tay nào được lưu</p>';
+                } else {
+                    listElement.innerHTML = fingerprints.map(fp => `
+                        <div class="fingerprint-item">
+                            <div>
+                                <strong>ID ${fp.fingerprint_id}:</strong> ${fp.name}
+                                <small class="text-muted d-block">Thêm lúc: ${new Date(fp.created_at).toLocaleString('vi-VN')}</small>
+                            </div>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteFingerprint(${fp.fingerprint_id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                document.getElementById('fingerprint-list').innerHTML =
+                    `<p class="text-danger text-center">Lỗi tải dữ liệu: ${error.message}</p>`;
+            }
+        }
+
+        // Tải lịch sử
+        async function loadHistory() {
+            try {
+                const response = await fetch('/history');
+                const history = await response.json();
+
+                const listElement = document.getElementById('history-list');
+
+                if (history.length === 0) {
+                    listElement.innerHTML = '<p class="text-muted text-center">Chưa có lịch sử nào</p>';
+                } else {
+                    listElement.innerHTML = history.map(record => `
+                        <div class="history-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>${record.action}</strong>
+                                    <small class="text-muted ms-2">(${record.method})</small>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <small class="text-muted">${record.timestamp}</small>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteHistoryRecord(${record.id})" title="Xóa">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                document.getElementById('history-list').innerHTML =
+                    `<p class="text-danger text-center">Lỗi tải dữ liệu: ${error.message}</p>`;
+            }
+        }
+
+        // Xóa tất cả lịch sử
+        async function clearAllHistory() {
+            if (!confirm('Bạn có chắc chắn muốn xóa TẤT CẢ lịch sử? Hành động này không thể hoàn tác!')) {
+                return;
+            }
+
+            // Xác nhận lần 2 cho an toàn
+            if (!confirm('Xác nhận lần cuối: Xóa tất cả lịch sử đóng mở cửa?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/history/clear', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    showMessage('history-status', result.message, 'success');
+                    loadHistory();
+                } else {
+                    showMessage('history-status', result.message, 'danger');
+                }
+            } catch (error) {
+                showMessage('history-status', 'Lỗi kết nối: ' + error.message, 'danger');
+            }
+        }
+
+        // Xóa một bản ghi lịch sử
+        async function deleteHistoryRecord(recordId) {
+            if (!confirm('Bạn có chắc chắn muốn xóa bản ghi này?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/history/delete/${recordId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    showMessage('history-status', result.message, 'success');
+                    loadHistory();
+                } else {
+                    showMessage('history-status', result.message, 'danger');
+                }
+            } catch (error) {
+                showMessage('history-status', 'Lỗi kết nối: ' + error.message, 'danger');
+            }
+        }
+
+        // Tải dữ liệu khi trang được tải
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFingerprints();
+            loadHistory();
+        });
+    </script>
+</body>
+</html>

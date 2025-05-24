@@ -7,10 +7,10 @@ from datetime import datetime
 app = Flask(__name__)
 
 # Cấu hình MQTT (TLS, port 8883, user/pass)
-MQTT_BROKER = "f03f9ea0745245ce996d7f35c388d455.s1.eu.hivemq.cloud"  # Địa chỉ broker của bạn
+MQTT_BROKER = "95df3482229d4924870ef40da3357ae0.s1.eu.hivemq.cloud"  # Địa chỉ broker của bạn
 MQTT_PORT = 8883  # Port TLS chuẩn của MQTT
-MQTT_USER = "ngtuananh24"  # Thay username broker MQTT
-MQTT_PASS = "Anh2407@"  # Thay password broker MQTT
+MQTT_USER = "nglinh123"  # Thay username broker MQTT
+MQTT_PASS = "Linh123@"  # Thay password broker MQTT
 MQTT_TOPIC_DOOR = "door/control"
 MQTT_TOPIC_FINGERPRINT = "fingerprint/control"
 

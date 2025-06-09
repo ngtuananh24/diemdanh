@@ -16,7 +16,7 @@ MQTT_TOPIC_FINGERPRINT = "fingerprint/control"
 
 # Cấu hình MySQL
 MYSQL_CONFIG = {
-    'host': 'dieukhiencua.duckdns.org',
+    'host': '34.133.136.153',
     'user': 'admin',
     'password': 'admin',  # Thay password DB
     'database': 'door_control'
